@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <title>FC Career Mode Random Squad Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="favicon.png" />
-  <link rel="apple-touch-icon" href="favicon.png" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
   <style>
     /* =========================
        THEME SYSTEM
@@ -899,6 +899,10 @@
       animation: fade-in 0.16s ease-out;
     }
 
+    .ovr-range-hidden {
+      display: none !important;
+    }
+
     .page-footer {
       margin-top: 14px;
       text-align: center;
@@ -1122,6 +1126,9 @@
               <select id="formationSelect" style="width: 100%;">
                 <!-- options injected by JS -->
               </select>
+              <div class="btn-row" style="margin-top: 6px;">
+                <button class="secondary small" id="randomFormationBtn">Random Formation</button>
+              </div>
               <div class="small-note" id="formationHint">Select any FC 26-style system.</div>
             </div>
             <div>
@@ -1148,14 +1155,16 @@
               <option value="chaos">Extreme Chaos (50–95)</option>
               <option value="custom">Custom</option>
             </select>
-            <label class="checkbox">
-              Min:
-              <input type="number" id="ovrMinInput" value="70" min="40" max="99" style="width: 60px;" />
-            </label>
-            <label class="checkbox">
-              Max:
-              <input type="number" id="ovrMaxInput" value="82" min="40" max="99" style="width: 60px;" />
-            </label>
+            <div id="ovrRangeWrap" style="display:flex;gap:8px;">
+              <label class="checkbox">
+                Min:
+                <input type="number" id="ovrMinInput" value="70" min="40" max="99" style="width: 60px;" />
+              </label>
+              <label class="checkbox">
+                Max:
+                <input type="number" id="ovrMaxInput" value="82" min="40" max="99" style="width: 60px;" />
+              </label>
+            </div>
           </div>
           <div class="small-note">
             Pick a preset or switch to Custom to type your own OVR range.
@@ -1353,20 +1362,20 @@
           "CAM",
           "ST", "ST"
         ],
+        "3-4-2-1": [
+          "GK", "CB", "CB", "CB",
+          "LM", "CM", "CM", "RM",
+          "LF", "ST", "RF"
+        ],
         "3-4-3": [
           "GK", "CB", "CB", "CB",
           "LM", "CM", "CM", "RM",
           "LW", "ST", "RW"
         ],
-        "3-5-2": [
-          "GK", "CB", "CB", "CB",
-          "CDM", "CM", "CM", "CAM", "RM",
-          "ST", "ST"
-        ],
-        "3-4-2-1": [
+        "3-4-3 Flat": [
           "GK", "CB", "CB", "CB",
           "LM", "CM", "CM", "RM",
-          "LF", "ST", "RF"
+          "LW", "ST", "RW"
         ],
         "3-5-1-1": [
           "GK", "CB", "CB", "CB",
@@ -1374,84 +1383,39 @@
           "CAM",
           "ST"
         ],
-        "4-3-3 (Attack)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "CDM", "CM", "CAM",
-          "LW", "ST", "RW"
-        ],
-        "4-3-3 (Defend)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "CDM", "CDM", "CM",
-          "LW", "ST", "RW"
-        ],
-        "4-3-3 (Holding)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "CDM", "CM", "CM",
-          "LW", "ST", "RW"
-        ],
-        "4-3-3 (Flat)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "CM", "CM", "CM",
-          "LW", "ST", "RW"
-        ],
-        "4-3-3 (False 9)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "CDM", "CM", "CM",
-          "LW", "CF", "RW"
-        ],
-        "4-2-3-1 (Narrow)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "CDM", "CDM",
-          "CAM", "CAM", "CAM",
-          "ST"
-        ],
-        "4-2-3-1 (Wide)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "CDM", "CDM",
-          "CAM", "LW", "RW",
-          "ST"
-        ],
-        "4-4-2": [
-          "GK", "RB", "CB", "CB", "LB",
-          "RM", "CM", "CM", "LM",
+        "3-5-2": [
+          "GK", "CB", "CB", "CB",
+          "CDM", "CM", "CM", "CAM", "RM",
           "ST", "ST"
         ],
-        "4-4-2 (Holding)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "RM", "CDM", "CM", "LM",
-          "ST", "ST"
-        ],
-        "4-4-1-1": [
-          "GK", "RB", "CB", "CB", "LB",
-          "RM", "CM", "CM", "LM",
-          "CF", "ST"
-        ],
-        "4-5-1": [
-          "GK", "RB", "CB", "CB", "LB",
-          "RM", "CM", "CDM", "CM", "LM",
-          "ST"
-        ],
-        "4-5-1 (Attack)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "RM", "CM", "CAM", "CM", "LM",
-          "ST"
-        ],
-        "4-1-2-1-2 (Narrow)": [
-          "GK", "RB", "CB", "CB", "LB",
-          "CDM", "CM", "CM", "CAM",
-          "ST", "ST"
-        ],
-        "4-1-2-1-2 (Wide)": [
+        "4-1-2-1-2": [
           "GK", "RB", "CB", "CB", "LB",
           "CDM",
           "RM", "LM",
           "CAM",
           "ST", "ST"
         ],
-        "4-3-1-2": [
+        "4-1-2-1-2 (2)": [
           "GK", "RB", "CB", "CB", "LB",
-          "CDM", "CM", "CM",
+          "CDM", "CM", "CM", "CAM",
+          "ST", "ST"
+        ],
+        "4-1-2-1-2 Narrow": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM", "CAM",
+          "ST", "ST"
+        ],
+        "4-1-2-1-2 Wide": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM",
+          "RM", "LM",
           "CAM",
+          "ST", "ST"
+        ],
+        "4-1-3-2": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM",
+          "RM", "CM", "LM",
           "ST", "ST"
         ],
         "4-1-4-1": [
@@ -1460,11 +1424,41 @@
           "RM", "CM", "CM", "LM",
           "ST"
         ],
+        "4-2-1-3": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "CAM",
+          "LW", "ST", "RW"
+        ],
         "4-2-2-2": [
           "GK", "RB", "CB", "CB", "LB",
           "CDM", "CDM",
           "CAM", "CAM",
           "ST", "ST"
+        ],
+        "4-2-3-1": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "CAM", "CAM", "CAM",
+          "ST"
+        ],
+        "4-2-3-1 (2)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "CAM", "LW", "RW",
+          "ST"
+        ],
+        "4-2-3-1 Narrow": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "CAM", "CAM", "CAM",
+          "ST"
+        ],
+        "4-2-3-1 Wide": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "CAM", "LW", "RW",
+          "ST"
         ],
         "4-2-4": [
           "GK", "RB", "CB", "CB", "LB",
@@ -1472,35 +1466,151 @@
           "RW", "LW",
           "ST", "ST"
         ],
+        "4-3-1-2": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "CAM",
+          "ST", "ST"
+        ],
         "4-3-2-1": [
           "GK", "RB", "CB", "CB", "LB",
           "CDM", "CM", "CM",
           "LF", "RF", "ST"
         ],
+        "4-3-3": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 (2)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 (3)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CM", "CM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 (4)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 Attack": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CAM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 Defend": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 Flat": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CM", "CM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 Holding": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 (False 9)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-4-1-1": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CM", "LM",
+          "ST", "ST"
+        ],
+        "4-4-1-1 (2)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CDM", "CM", "LM",
+          "CAM", "ST"
+        ],
+        "4-4-1-1 Midfield": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CDM", "CM", "LM",
+          "CAM", "ST"
+        ],
+        "4-4-2": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CM", "LM",
+          "ST", "ST"
+        ],
+        "4-4-2 (2)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CDM", "CDM", "LM",
+          "ST", "ST"
+        ],
+        "4-4-2 Flat": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CM", "LM",
+          "ST", "ST"
+        ],
+        "4-4-2 Holding": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CDM", "CM", "LM",
+          "ST", "ST"
+        ],
+        "4-5-1": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CDM", "CM", "LM",
+          "ST"
+        ],
+        "4-5-1 (2)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CAM", "CM", "LM",
+          "ST"
+        ],
+        "4-5-1 Attack": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CAM", "CM", "LM",
+          "ST"
+        ],
+        "4-5-1 Flat": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CM", "CM", "LM",
+          "ST"
+        ],
         "5-2-1-2": [
-          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "GK", "RB", "CB", "CB", "CB", "LB",
           "CM", "CM",
           "CAM",
           "ST", "ST"
         ],
         "5-2-2-1": [
-          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "GK", "RB", "CB", "CB", "CB", "LB",
           "CM", "CM",
           "RW", "LW",
           "ST"
         ],
         "5-2-3": [
-          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "GK", "RB", "CB", "CB", "CB", "LB",
           "CM", "CM",
           "RW", "ST", "LW"
         ],
         "5-3-2": [
-          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "GK", "RB", "CB", "CB", "CB", "LB",
           "CM", "CDM", "CM",
           "ST", "ST"
         ],
+        "5-3-2 Holding": [
+          "GK", "RB", "CB", "CB", "CB", "LB",
+          "CDM", "CDM", "CM",
+          "ST", "ST"
+        ],
         "5-4-1": [
-          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "GK", "RB", "CB", "CB", "CB", "LB",
+          "RM", "CM", "CM", "LM",
+          "ST"
+        ],
+        "5-4-1 Flat": [
+          "GK", "RB", "CB", "CB", "CB", "LB",
           "RM", "CM", "CM", "LM",
           "ST"
         ]
@@ -1512,34 +1622,51 @@
           items: [
             "3-1-4-2",
             "3-4-1-2",
-            "3-4-3",
-            "3-5-2",
             "3-4-2-1",
-            "3-5-1-1"
+            "3-4-3",
+            "3-4-3 Flat",
+            "3-5-1-1",
+            "3-5-2"
           ]
         },
         {
           label: "4-back Systems",
           items: [
-            "4-3-3 (Attack)",
-            "4-3-3 (Defend)",
-            "4-3-3 (Holding)",
-            "4-3-3 (Flat)",
-            "4-3-3 (False 9)",
-            "4-2-3-1 (Narrow)",
-            "4-2-3-1 (Wide)",
-            "4-4-2",
-            "4-4-2 (Holding)",
-            "4-4-1-1",
-            "4-5-1",
-            "4-5-1 (Attack)",
-            "4-1-2-1-2 (Narrow)",
-            "4-1-2-1-2 (Wide)",
-            "4-3-1-2",
+            "4-1-2-1-2",
+            "4-1-2-1-2 (2)",
+            "4-1-2-1-2 Narrow",
+            "4-1-2-1-2 Wide",
+            "4-1-3-2",
             "4-1-4-1",
+            "4-2-1-3",
             "4-2-2-2",
+            "4-2-3-1",
+            "4-2-3-1 (2)",
+            "4-2-3-1 Narrow",
+            "4-2-3-1 Wide",
             "4-2-4",
-            "4-3-2-1"
+            "4-3-1-2",
+            "4-3-2-1",
+            "4-3-3",
+            "4-3-3 (2)",
+            "4-3-3 (3)",
+            "4-3-3 (4)",
+            "4-3-3 Attack",
+            "4-3-3 Defend",
+            "4-3-3 Flat",
+            "4-3-3 Holding",
+            "4-3-3 (False 9)",
+            "4-4-1-1",
+            "4-4-1-1 (2)",
+            "4-4-1-1 Midfield",
+            "4-4-2",
+            "4-4-2 (2)",
+            "4-4-2 Flat",
+            "4-4-2 Holding",
+            "4-5-1",
+            "4-5-1 (2)",
+            "4-5-1 Attack",
+            "4-5-1 Flat"
           ]
         },
         {
@@ -1549,10 +1676,23 @@
             "5-2-2-1",
             "5-2-3",
             "5-3-2",
-            "5-4-1"
+            "5-3-2 Holding",
+            "5-4-1",
+            "5-4-1 Flat"
           ]
         }
       ];
+
+      // Legacy aliases so old presets still load even after renaming display labels
+      Object.entries({
+        "4-3-3 (Attack)": "4-3-3 Attack",
+        "4-3-3 (Defend)": "4-3-3 Defend",
+        "4-3-3 (Holding)": "4-3-3 Holding",
+        "4-3-3 (Flat)": "4-3-3 Flat",
+        "4-5-1 (Attack)": "4-5-1 Attack"
+      }).forEach(([oldName, newName]) => {
+        formations[oldName] = formations[newName] || formations[oldName];
+      });
 
       const nationalities = [
         "England", "France", "Spain", "Germany", "Italy", "Portugal",
@@ -1711,6 +1851,13 @@
         return "ovr-high";
       }
 
+      function normalizePosition(pos) {
+        if (pos === "RWB") return "RB";
+        if (pos === "LWB") return "LB";
+        if (pos === "CF") return "ST";
+        return pos;
+      }
+
       // =========================
       // DOM HOOKS
       // =========================
@@ -1740,10 +1887,12 @@
       // Squad settings
       const formationSelect = document.getElementById("formationSelect");
       const formationHint = document.getElementById("formationHint");
+      const randomFormationBtn = document.getElementById("randomFormationBtn");
       const squadSizeSelect = document.getElementById("squadSizeSelect");
       const ovrPresetSelect = document.getElementById("ovrPresetSelect");
       const ovrMinInput = document.getElementById("ovrMinInput");
       const ovrMaxInput = document.getElementById("ovrMaxInput");
+      const ovrRangeWrap = document.getElementById("ovrRangeWrap");
 
       const attrNationality = document.getElementById("attrNationality");
       const attrHeight = document.getElementById("attrHeight");
@@ -1828,6 +1977,23 @@
 
       formationSelect.addEventListener("change", () => {
         formationHint.textContent = `Current: ${formationSelect.value}`;
+        updateExportText();
+      });
+
+      function pickRandomFormation() {
+        const options = Array.from(formationSelect.querySelectorAll("option")).map(o => o.value).filter(Boolean);
+        if (!options.length) return null;
+        const choice = pickRandom(options);
+        formationSelect.value = choice;
+        formationSelect.dispatchEvent(new Event("change"));
+        return choice;
+      }
+
+      randomFormationBtn.addEventListener("click", () => {
+        const chosen = pickRandomFormation();
+        if (chosen) {
+          formationHint.textContent = `Random: ${chosen}`;
+        }
       });
 
       // =========================
@@ -1836,6 +2002,7 @@
 
       function applyOvrPreset(preset) {
         let min = 70, max = 82;
+        let showCustom = false;
         switch (preset) {
           case "youth":
             min = 60; max = 76; break;
@@ -1848,31 +2015,20 @@
           case "balanced":
             min = 70; max = 82; break;
           case "custom":
-            // keep current, just unlock inputs
-            ovrMinInput.disabled = false;
-            ovrMaxInput.disabled = false;
-            return;
+            showCustom = true;
+            break;
         }
         ovrMinInput.value = min;
         ovrMaxInput.value = max;
-        if (preset === "custom") {
-          ovrMinInput.disabled = false;
-          ovrMaxInput.disabled = false;
-        } else {
-          ovrMinInput.disabled = false;
-          ovrMaxInput.disabled = false;
-        }
+        const enable = showCustom;
+        ovrMinInput.disabled = !enable;
+        ovrMaxInput.disabled = !enable;
+        ovrRangeWrap.classList.toggle("ovr-range-hidden", !enable);
       }
 
       ovrPresetSelect.addEventListener("change", () => {
         applyOvrPreset(ovrPresetSelect.value);
-        if (ovrPresetSelect.value === "custom") {
-          ovrMinInput.disabled = false;
-          ovrMaxInput.disabled = false;
-        } else {
-          ovrMinInput.disabled = false;
-          ovrMaxInput.disabled = false;
-        }
+        updateExportText();
       });
 
       // =========================
@@ -1881,6 +2037,7 @@
 
       function generateAge(position) {
         const realism = realismToggle.checked;
+        const pos = normalizePosition(position);
 
         if (!realism) {
           const tier = weightedPick([
@@ -1894,21 +2051,21 @@
         }
 
         // realism: GK a bit older, defenders older than wingers
-        if (position === "GK") {
+        if (pos === "GK") {
           return weightedPick([
             { value: randInt(20, 24), weight: 20 },
             { value: randInt(25, 30), weight: 45 },
             { value: randInt(31, 37), weight: 35 }
           ]);
         }
-        if (["CB", "RB", "LB", "RWB", "LWB"].includes(position)) {
+        if (["CB", "RB", "LB", "RWB", "LWB"].includes(pos)) {
           return weightedPick([
             { value: randInt(19, 23), weight: 25 },
             { value: randInt(24, 29), weight: 50 },
             { value: randInt(30, 34), weight: 25 }
           ]);
         }
-        if (["CM", "CDM", "CAM"].includes(position)) {
+        if (["CM", "CDM", "CAM"].includes(pos)) {
           return weightedPick([
             { value: randInt(18, 23), weight: 30 },
             { value: randInt(24, 29), weight: 45 },
@@ -1943,12 +2100,13 @@
       }
 
       function generateHeight(position) {
-        if (position === "GK") return randInt(188, 203);
-        if (["CB"].includes(position)) return randInt(183, 196);
-        if (["RB", "LB", "RWB", "LWB"].includes(position)) return randInt(174, 185);
-        if (["CM", "CDM", "CAM"].includes(position)) return randInt(172, 186);
-        if (["LW", "RW", "LM", "RM", "LF", "RF"].includes(position)) return randInt(168, 183);
-        if (["ST"].includes(position)) return randInt(175, 193);
+        const pos = normalizePosition(position);
+        if (pos === "GK") return randInt(188, 203);
+        if (["CB"].includes(pos)) return randInt(183, 196);
+        if (["RB", "LB", "RWB", "LWB"].includes(pos)) return randInt(174, 185);
+        if (["CM", "CDM", "CAM"].includes(pos)) return randInt(172, 186);
+        if (["LW", "RW", "LM", "RM", "LF", "RF"].includes(pos)) return randInt(168, 183);
+        if (["ST"].includes(pos)) return randInt(175, 193);
         return randInt(170, 190);
       }
 
@@ -1967,13 +2125,15 @@
       }
 
       function generateWeakFoot(position) {
-        const base = ["ST", "LW", "RW", "LF", "RF", "CAM"].includes(position) ? 3 : 2;
+        const pos = normalizePosition(position);
+        const base = ["ST", "LW", "RW", "LF", "RF", "CAM"].includes(pos) ? 3 : 2;
         let wf = base + randInt(0, 2);
         return Math.min(5, wf);
       }
 
       function generateSkillMoves(position) {
-        const base = ["ST", "LW", "RW", "LF", "RF", "CAM"].includes(position) ? 3 : 2;
+        const pos = normalizePosition(position);
+        const base = ["ST", "LW", "RW", "LF", "RF", "CAM"].includes(pos) ? 3 : 2;
         let sm = base + randInt(0, 2);
         return Math.min(5, sm);
       }
@@ -2049,18 +2209,19 @@
       }
 
       function generatePlayer(position, index) {
-        const age = generateAge(position);
+        const pos = normalizePosition(position);
+        const age = generateAge(pos);
         const ovr = generateOvr();
         const nationality = pickRandom(nationalities);
-        const heightCm = generateHeight(position);
+        const heightCm = generateHeight(pos);
         const potential = generatePotential(age);
         const foot = generateFoot();
-        const wf = generateWeakFoot(position);
-        const sm = generateSkillMoves(position);
+        const wf = generateWeakFoot(pos);
+        const sm = generateSkillMoves(pos);
 
         return {
           index,
-          position,
+          position: pos,
           age,
           ovr,
           nationality,
@@ -2074,7 +2235,7 @@
 
       function buildPositionPool(formationName, squadSize) {
         const base = formations[formationName] || formations["4-3-3 (Holding)"];
-        const positions = [...base];
+        const positions = [...base].map(normalizePosition);
         const extraNeeded = Math.max(0, squadSize - base.length);
 
         const extraOrder = [
@@ -2087,7 +2248,7 @@
 
         let idx = 0;
         for (let i = 0; i < extraNeeded; i++) {
-          positions.push(extraOrder[idx % extraOrder.length]);
+          positions.push(normalizePosition(extraOrder[idx % extraOrder.length]));
           idx++;
         }
         return positions;
@@ -2752,12 +2913,16 @@
         ovrMinInput.value = data.ovr?.min ?? ovrMinInput.value;
         ovrMaxInput.value = data.ovr?.max ?? ovrMaxInput.value;
         ovrPresetSelect.value = data.ovr?.preset ?? ovrPresetSelect.value;
+        applyOvrPreset(ovrPresetSelect.value);
 
         formationSelect.value = data.formation || formationSelect.value;
         squadSizeSelect.value = data.squadSize || squadSizeSelect.value;
 
         buildTableHeader();
-        players = data.players || [];
+        players = (data.players || []).map(p => ({
+          ...p,
+          position: normalizePosition(p.position)
+        }));
         renderSquadTable();
 
         if (data.story?.currentStory) {
