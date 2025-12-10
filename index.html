@@ -1,0 +1,2813 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="neon">
+<head>
+  <meta charset="UTF-8" />
+  <title>FC Career Mode Random Squad Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <style>
+    /* =========================
+       THEME SYSTEM
+    ========================== */
+
+    :root {
+      --bg-main: #040714;
+      --bg-alt: #070b1d;
+      --bg-card: #080d21;
+      --accent: #00f5a0;
+      --accent-soft: rgba(0, 245, 160, 0.12);
+      --accent-2: #00d4ff;
+      --glow-strong: 0 0 28px rgba(0, 245, 160, 0.45), 0 0 42px rgba(0, 212, 255, 0.4);
+      --glow-soft: 0 0 14px rgba(0, 245, 160, 0.32);
+      --display-font: "Orbitron", "Eurostile", "Bank Gothic", "Segoe UI", system-ui, sans-serif;
+      --text-main: #f7f9ff;
+      --text-dim: #a0abc8;
+      --border-subtle: rgba(255, 255, 255, 0.09);
+      --danger: #ff4b81;
+      --radius-card: 18px;
+      --shadow-soft: 0 20px 40px rgba(0, 0, 0, 0.55);
+      --bg-gradient: radial-gradient(circle at top, #1e2750 0, #040714 45%, #020310 100%);
+    }
+
+    :root[data-theme="neon"] {
+      --bg-main: #040714;
+      --bg-alt: #070b1d;
+      --bg-card: #080d21;
+      --accent: #00f5a0;
+      --accent-soft: rgba(0, 245, 160, 0.12);
+      --accent-2: #00d4ff;
+      --bg-gradient: radial-gradient(circle at top, #1e2750 0, #040714 45%, #020310 100%);
+    }
+
+    :root[data-theme="teal"] {
+      --bg-main: #021018;
+      --bg-alt: #031821;
+      --bg-card: #041f2c;
+      --accent: #13e2ba;
+      --accent-soft: rgba(19, 226, 186, 0.17);
+      --accent-2: #24c1ff;
+      --bg-gradient: radial-gradient(circle at top, #06435a 0, #021018 45%, #01060a 100%);
+    }
+
+    :root[data-theme="cyber"] {
+      --bg-main: #050012;
+      --bg-alt: #0b0320;
+      --bg-card: #100430;
+      --accent: #ff5fd7;
+      --accent-soft: rgba(255, 95, 215, 0.18);
+      --accent-2: #13f2ff;
+      --bg-gradient: radial-gradient(circle at top, #3b106a 0, #050012 45%, #010005 100%);
+    }
+
+    :root[data-theme="gold"] {
+      --bg-main: #050607;
+      --bg-alt: #080b10;
+      --bg-card: #0c1017;
+      --accent: #ffcc4d;
+      --accent-soft: rgba(255, 204, 77, 0.16);
+      --accent-2: #ffd76e;
+      --bg-gradient: radial-gradient(circle at top, #3f2a02 0, #050607 45%, #020203 100%);
+    }
+
+    :root[data-theme="emerald"] {
+      --bg-main: #020f0d;
+      --bg-alt: #031815;
+      --bg-card: #05201d;
+      --accent: #27f59c;
+      --accent-soft: rgba(39, 245, 156, 0.16);
+      --accent-2: #22d2ff;
+      --bg-gradient: radial-gradient(circle at top, #094332 0, #020f0d 45%, #010705 100%);
+    }
+
+    /* =========================
+       BASE STYLES
+    ========================== */
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding-top: 80px;
+      }
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1250px;
+      display: grid;
+      grid-template-areas:
+        "header header"
+        "left   right"
+        "bottom bottom";
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 2fr);
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 18px;
+    }
+
+    @media (max-width: 1000px) {
+      .app-shell {
+        grid-template-areas:
+          "header"
+          "left"
+          "right"
+          "bottom";
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: linear-gradient(145deg, var(--bg-card), var(--bg-alt));
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft), inset 0 0 0 1px rgba(255, 255, 255, 0.02), var(--glow-soft);
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.04), transparent 55%),
+        radial-gradient(circle at bottom right, var(--accent-soft), transparent 60%);
+      opacity: 1;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--display-font);
+      text-shadow: 0 2px 8px rgba(0, 245, 160, 0.26);
+    }
+
+    .pill {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent-2);
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 999px;
+      padding: 3px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .subtext {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .divider {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin: 10px 0 12px;
+    }
+
+    .section-label {
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .muted {
+      color: var(--text-dim);
+      font-size: 0.78rem;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 7px 14px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #020308;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.08s ease, box-shadow 0.08s ease,
+        filter 0.12s ease, opacity 0.1s ease;
+      white-space: nowrap;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45), var(--glow-soft);
+    }
+
+    button .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.7), rgba(0, 245, 160, 0.15), transparent 65%);
+      opacity: 0.8;
+      pointer-events: none;
+      animation: ripple 0.6s ease-out;
+      mix-blend-mode: screen;
+    }
+
+    button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.5), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      pointer-events: none;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.5), var(--glow-strong);
+      filter: brightness(1.05);
+    }
+
+    button:hover:not(:disabled)::before {
+      opacity: 1;
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    button.destructive {
+      background: transparent;
+      color: var(--danger);
+      border-color: rgba(255, 75, 129, 0.8);
+    }
+
+    button.small {
+      padding: 5px 10px;
+      font-size: 0.72rem;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    input,
+    select,
+    textarea {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 7px 9px;
+      color: var(--text-main);
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 0, 0, 0.2);
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    label.checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+
+    label.checkbox input {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+    }
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    .app-header {
+      grid-area: header;
+      position: sticky;
+      top: 8px;
+      z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .app-header-inner {
+      pointer-events: auto;
+      background: linear-gradient(
+        120deg,
+        var(--accent-soft),
+        rgba(0, 0, 0, 0.7)
+      );
+      position: relative;
+      border-radius: 999px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 245, 160, 0.26);
+    }
+
+    .app-header-inner::after {
+      content: "";
+      position: absolute;
+      inset: -40% -20%;
+      background: linear-gradient(110deg, transparent 35%, rgba(0, 245, 160, 0.18) 50%, rgba(0, 212, 255, 0.2) 65%, transparent 80%);
+      opacity: 0.9;
+      transform: translateX(-40%) rotate(2deg);
+      animation: header-sweep 6s ease-in-out infinite;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .logo {
+      width: 26px;
+      height: 26px;
+      border-radius: 9px;
+      background: radial-gradient(circle at 20% 0, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #020308;
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.45), 0 0 16px rgba(0, 245, 160, 0.55), 0 0 22px rgba(0, 212, 255, 0.4);
+    }
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .title-main {
+      font-size: 0.84rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: var(--display-font);
+      text-shadow: 0 2px 8px rgba(0, 245, 160, 0.26);
+    }
+
+    .title-sub {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    .header-right {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .chip {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    @media (max-width: 900px) {
+      .app-header {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 30px);
+      }
+      .chip {
+        display: none;
+      }
+    }
+
+    /* =========================
+       LEFT COLUMN (CLUB + SETTINGS)
+    ========================== */
+
+    .left-column {
+      grid-area: left;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-block {
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      padding: 9px 11px;
+    }
+
+    .info-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 0.92rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .info-sub {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    .tag-row {
+      margin-top: 7px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 4px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .tag.green {
+      border-color: rgba(0, 245, 160, 0.7);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .tag.blue {
+      border-color: rgba(0, 212, 255, 0.7);
+      color: var(--accent-2);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .settings-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .settings-row label {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+    }
+
+    .small-note {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* =========================
+       RIGHT COLUMN (SQUAD TABLE)
+    ========================== */
+
+    .right-column {
+      grid-area: right;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .squad-meta-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.75rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(0, 0, 0, 0.5);
+      color: var(--text-dim);
+    }
+
+    .badge.green {
+      border-color: rgba(0, 245, 160, 0.7);
+      color: var(--accent);
+    }
+
+    .badge.blue {
+      border-color: rgba(0, 212, 255, 0.7);
+      color: var(--accent-2);
+    }
+
+    .table-shell {
+      max-height: 320px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    thead {
+      background: rgba(7, 10, 22, 0.98);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    th,
+    td {
+      padding: 6px 7px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      white-space: nowrap;
+    }
+
+    th {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-dim);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(4, 7, 18, 0.95);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(8, 11, 22, 0.96);
+    }
+
+    tbody tr.starter {
+      border-left: 3px solid var(--accent);
+    }
+
+    tbody tr.sub {
+      border-left: 3px solid var(--accent-2);
+    }
+
+    tbody tr:hover {
+      background: rgba(25, 40, 86, 0.95);
+      box-shadow: 0 0 0 1px rgba(0, 245, 160, 0.25), 0 0 14px rgba(0, 245, 160, 0.32), 0 12px 28px rgba(0, 0, 0, 0.45);
+    }
+
+    .pos-cell {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .ovr-cell {
+      font-weight: 600;
+    }
+
+    .ovr-low {
+      color: #ffd86b;
+    }
+
+    .ovr-mid {
+      color: var(--accent-2);
+    }
+
+    .ovr-high {
+      color: var(--accent);
+    }
+
+    .age-tag {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    /* =========================
+       HOVER PLAYER CARD
+    ========================== */
+
+    .player-card {
+      position: fixed;
+      min-width: 210px;
+      max-width: 240px;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.22), transparent 55%),
+        linear-gradient(145deg, var(--bg-card), var(--bg-alt));
+      border-radius: 16px;
+      padding: 10px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 20px 38px rgba(0, 0, 0, 0.7);
+      transform-origin: top left;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .player-card.visible {
+      animation: card-pop 0.14s ease-out forwards;
+    }
+
+    @keyframes card-pop {
+      from {
+        transform: translateY(4px) scale(0.96);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .pc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+
+    .pc-pos {
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .pc-ovr {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .pc-nat {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .pc-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      margin: 2px 0;
+    }
+
+    .pc-label {
+      color: var(--text-dim);
+    }
+
+    /* =========================
+       BOTTOM ROW (STORY + EXPORT)
+    ========================== */
+
+    .bottom-row {
+      grid-area: bottom;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 2fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .bottom-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .story-body {
+      font-size: 0.78rem;
+      color: var(--text-main);
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .story-empty {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+    }
+
+    .story-toggle-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .collapse-btn {
+      margin-top: 6px;
+      font-size: 0.72rem;
+    }
+
+    .story-collapsed .story-body {
+      display: none;
+    }
+
+    .story-collapsed .story-empty {
+      display: block;
+    }
+
+    textarea#exportText {
+      width: 100%;
+      min-height: 120px;
+      max-height: 220px;
+      resize: vertical;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+        Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.75rem;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .hint {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* =========================
+       OVERLAY SPINNER
+    ========================== */
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.95));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 30;
+      transition: opacity 0.2s ease;
+    }
+
+    .overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .spinner-shell {
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 20px;
+      padding: 18px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.7);
+      text-align: center;
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      position: relative;
+      border: 3px solid rgba(255, 255, 255, 0.05);
+      border-top-color: rgba(0, 245, 160, 0.35);
+      border-right-color: rgba(0, 212, 255, 0.28);
+      margin: 0 auto 10px;
+      animation: spin 1s linear infinite;
+      box-shadow: 0 0 14px rgba(0, 245, 160, 0.25);
+      overflow: visible;
+    }
+
+    .spinner::before {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: var(--accent);
+      border-left-color: rgba(0, 212, 255, 0.65);
+      filter: drop-shadow(0 0 12px rgba(0, 245, 160, 0.6));
+      animation: spin 1.6s linear infinite reverse;
+    }
+
+    .spinner::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(0, 245, 160, 0.9), rgba(0, 212, 255, 0.4), transparent 70%);
+      animation: pulse-dot 1.8s ease-in-out infinite;
+      box-shadow: 0 0 12px rgba(0, 245, 160, 0.6);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spinner-text {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    /* =========================
+       SMALL HELPERS
+    ========================== */
+
+    .fade-in {
+      animation: fade-in 0.16s ease-out;
+    }
+
+    .page-footer {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      opacity: 0.9;
+    }
+
+    @keyframes header-sweep {
+      0% {
+        transform: translateX(-40%) rotate(2deg);
+        opacity: 0;
+      }
+      15% {
+        opacity: 1;
+      }
+      60% {
+        transform: translateX(30%) rotate(2deg);
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateX(60%) rotate(2deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes ripple {
+      0% {
+        transform: scale(0);
+        opacity: 0.6;
+      }
+      100% {
+        transform: scale(6);
+        opacity: 0;
+      }
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% {
+        transform: scale(0.9);
+        opacity: 0.75;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="app-header-inner">
+        <div class="logo">V</div>
+        <div class="title-block">
+          <div class="title-main">New Vision Web Agency</div>
+          <div class="title-sub">FC Career Mode Random Squad Generator · Career Mode Lab</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="chip">Prototype v4 · Interactive</span>
+        <span class="chip">Career Mode Lab</span>
+        <label class="checkbox">
+          Theme:
+          <select id="themeSelect">
+            <option value="neon">Neon Blue</option>
+            <option value="teal">EA Teal</option>
+            <option value="cyber">Cyberpunk</option>
+            <option value="gold">Gold Elite</option>
+            <option value="emerald">Emerald Dark</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <!-- LEFT COLUMN -->
+    <section class="left-column">
+      <!-- CLUB CARD -->
+      <article class="card fade-in">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">
+              Club Identity
+              <span class="pill">World &amp; Story Setup</span>
+            </div>
+          </div>
+          <p class="subtext">
+            Generate a completely random club profile to go with your random squad:
+            name, stadium, budget, rivalry and a season challenge.
+          </p>
+          <div class="divider"></div>
+
+          <div class="section-label">Club Profile</div>
+          <div class="info-grid">
+            <div class="info-block">
+              <div class="info-label">Club Name</div>
+              <div class="info-value">
+                <span id="clubName">–</span>
+              </div>
+
+              <div class="info-label" style="margin-top: 8px;">Stadium</div>
+              <div class="info-value">
+                <span id="stadiumName">–</span>
+              </div>
+
+              <div class="tag-row">
+                <span class="tag green" id="clubBudgetTag">Budget tier: –</span>
+                <span class="tag blue" id="fanExpectationsTag">Fans: –</span>
+              </div>
+            </div>
+
+            <div class="info-block">
+              <div class="info-label">Budget &amp; Crest</div>
+              <div class="info-value">
+                <span id="budgetValue">–</span>
+                <span class="info-sub" id="crestStyle">Crest: –</span>
+              </div>
+
+              <div class="info-label" style="margin-top: 8px;">Kit &amp; Rival</div>
+              <div class="info-value">
+                <span id="kitColors">–</span>
+                <span class="info-sub" id="rivalClub">Rival: –</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div class="section-label">Season Challenge</div>
+            <div class="info-block">
+              <div class="two-col" style="margin-bottom: 6px;">
+                <div>
+                  <div class="info-label">Difficulty</div>
+                  <select id="challengeTierSelect" style="width: 100%;">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                </div>
+                <div>
+                  <div class="info-label">Objective Summary</div>
+                  <div class="info-value" id="challengeSummary">Click Generate Club to roll a challenge.</div>
+                </div>
+              </div>
+              <div style="margin-top: 8px;">
+                <div class="info-label">Custom Challenge (optional)</div>
+                <input id="customChallengeInput" placeholder="e.g., Win the title with only academy graduates" style="width: 100%; margin-top: 4px;">
+                <div class="small-note">If set, replaces the generated challenge.</div>
+              </div>
+              <div class="small-note">
+                Difficulty affects the type of season objective you get.
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button id="generateClubBtn">Generate Club</button>
+            <button class="secondary" id="shuffleChallengeBtn">Shuffle Challenge Only</button>
+          </div>
+
+          <div class="btn-row" style="margin-top: 8px;">
+            <label class="checkbox">
+              <input type="checkbox" id="lockClubToggle" />
+              Lock current club identity when generating squads
+            </label>
+          </div>
+
+          <div class="divider" style="margin-top: 10px;"></div>
+          <div class="section-label">Story Add-ons (Optional)</div>
+          <div class="story-toggle-row">
+            <label class="checkbox">
+              <input type="checkbox" id="addNarrativeEra" />
+              Include narrative era (Youth revolution, Takeover, Crisis, etc.)
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="addBoardMood" />
+              Include board mood &amp; fan pressure
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="addFinancialEvent" />
+              Include random financial event
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="enableStoryPanel" checked />
+              Enable Career Story Panel
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <!-- SQUAD SETTINGS CARD -->
+      <article class="card fade-in">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">
+              Squad Generator
+              <span class="pill">Formation &amp; Attributes</span>
+            </div>
+          </div>
+          <p class="subtext">
+            Choose a formation, squad size, OVR tier and which attributes you want.
+            Generates a realistic or chaotic squad for your FC career.
+          </p>
+          <div class="divider"></div>
+
+          <div class="section-label">Squad Settings</div>
+          <div class="two-col" style="margin-bottom: 6px;">
+            <div>
+              <div class="info-label">Formation</div>
+              <select id="formationSelect" style="width: 100%;">
+                <!-- options injected by JS -->
+              </select>
+              <div class="small-note" id="formationHint">Select any FC 26-style system.</div>
+            </div>
+            <div>
+              <div class="info-label">Squad Size</div>
+              <select id="squadSizeSelect" style="width: 100%;">
+                <option value="11">11 (starting XI only)</option>
+                <option value="15">15 (XI + 4 bench)</option>
+                <option value="18">18 (matchday squad)</option>
+                <option value="22" selected>22 (XI + full bench)</option>
+                <option value="25">25 (deep squad)</option>
+                <option value="30">30 (super deep)</option>
+              </select>
+              <div class="small-note">Extra players are balanced by position.</div>
+            </div>
+          </div>
+
+          <div class="section-label" style="margin-top: 6px;">OVR Tier</div>
+          <div class="settings-row">
+            <select id="ovrPresetSelect">
+              <option value="balanced" selected>Balanced (70–82)</option>
+              <option value="youth">Youth Project (60–76)</option>
+              <option value="contender">Contender (75–85)</option>
+              <option value="super">Super Club (80–90)</option>
+              <option value="chaos">Extreme Chaos (50–95)</option>
+              <option value="custom">Custom</option>
+            </select>
+            <label class="checkbox">
+              Min:
+              <input type="number" id="ovrMinInput" value="70" min="40" max="99" style="width: 60px;" />
+            </label>
+            <label class="checkbox">
+              Max:
+              <input type="number" id="ovrMaxInput" value="82" min="40" max="99" style="width: 60px;" />
+            </label>
+          </div>
+          <div class="small-note">
+            Pick a preset or switch to Custom to type your own OVR range.
+          </div>
+
+          <div class="divider" style="margin-top: 12px;"></div>
+          <div class="section-label">Attributes to Include</div>
+          <div class="settings-row">
+            <label class="checkbox">
+              <input type="checkbox" id="attrNationality" checked />
+              Nationality
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="attrHeight" />
+              Height
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="attrFoot" checked />
+              Preferred Foot
+            </label>
+          </div>
+          <div class="settings-row" style="margin-top: 4px;">
+            <label class="checkbox">
+              <input type="checkbox" id="attrWeakFoot" checked />
+              Weak Foot
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="attrSkillMoves" checked />
+              Skill Moves
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="attrPotential" checked />
+              Potential Label
+            </label>
+          </div>
+          <div class="settings-row" style="margin-top: 4px;">
+            <label class="checkbox">
+              <input type="checkbox" id="realismToggle" />
+              Enable realism overhaul (affects age &amp; potential only)
+            </label>
+          </div>
+
+          <div class="btn-row" style="margin-top: 10px;">
+            <button id="generateSquadBtn">Generate Squad</button>
+            <button class="secondary" id="addPlayerBtn">+ Add 1 Player</button>
+            <button class="destructive" id="clearSquadBtn">Clear</button>
+          </div>
+          <div class="small-note">
+            Tip: Lock club identity above if you want to re-roll squads for the same team.
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- RIGHT COLUMN (SQUAD TABLE) -->
+    <section class="right-column">
+      <article class="card fade-in">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">
+              Squad Table
+              <span class="pill">Hover a player to inspect card</span>
+            </div>
+          </div>
+          <div class="squad-meta-row">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge">Starters: 1–11</span>
+              <span class="badge blue">Subs: 12+</span>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span class="badge" id="squadSummary">No squad generated yet</span>
+            </div>
+          </div>
+          <div class="table-shell">
+            <table>
+              <thead>
+                <tr id="tableHeaderRow">
+                  <!-- headers injected -->
+                </tr>
+              </thead>
+              <tbody id="squadBody">
+                <!-- rows injected -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- BOTTOM ROW (STORY + EXPORT) -->
+    <section class="bottom-row">
+      <!-- Story Panel -->
+      <article class="card fade-in" id="storyCard">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">
+              Career Story Panel
+              <span class="pill">Optional Narrative</span>
+            </div>
+            <button class="secondary small collapse-btn" id="toggleStoryCollapseBtn">
+              Collapse
+            </button>
+          </div>
+          <p class="subtext">
+            Generate extra narrative flavour: board expectations, fan pressure,
+            takeovers and plot twists for your save. Completely optional.
+          </p>
+          <div class="divider"></div>
+          <div class="section-label">Story Prompt</div>
+          <input id="storyPromptInput" placeholder="e.g., Financial chaos and fan revolt" style="width: 100%; margin-bottom: 10px;">
+          <div class="section-label" style="margin-top: 4px;">Add your own paragraph</div>
+          <textarea id="storyUserAddon" placeholder="Add your own narrative flavour and it will be appended to the generated story." style="width: 100%; min-height: 80px; margin-bottom: 10px;"></textarea>
+          <div class="divider"></div>
+          <div class="section-label">Story Overview</div>
+          <div class="story-body" id="storyBody">
+            No story generated yet. Enable story add-ons above and generate a club.
+          </div>
+          <div class="story-empty" id="storyEmpty" style="display: none;">
+            Story panel collapsed. Click Expand to show narrative details.
+          </div>
+        </div>
+      </article>
+
+      <!-- Export Panel -->
+      <article class="card fade-in">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">
+              Export for Career Notes
+              <span class="pill">Copy into Notion / Google Docs</span>
+            </div>
+          </div>
+          <p class="subtext">
+            This combines your club identity, season challenge, squad summary and
+            optional story into one clean text block.
+          </p>
+          <div class="divider"></div>
+          <label class="section-label" for="exportText">Export Block</label>
+          <textarea id="exportText" readonly placeholder="Generate a club and squad to see export text here..."></textarea>
+          <p class="hint">
+            Tip: Select all (Ctrl/Cmd + A) and copy to your notes, then tick players
+            off as you add them in FC.
+          </p>
+          <div class="divider"></div>
+          <div class="section-label">Presets</div>
+          <div class="two-col" style="margin-bottom: 8px;">
+            <div>
+              <div class="info-label">Preset Name</div>
+              <input id="presetNameInput" placeholder="e.g., Youth rebuild">
+            </div>
+            <div>
+              <div class="info-label">Saved Presets</div>
+              <select id="presetSelect" style="width: 100%;">
+                <option value="">Select preset</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button id="savePresetBtn">Save Preset</button>
+            <button class="secondary" id="loadPresetBtn">Load Preset</button>
+            <button class="secondary destructive small" id="deletePresetBtn">Delete</button>
+          </div>
+        </div>
+      </article>
+    </section>
+    <footer class="page-footer">© 2025 New Vision Web Agency. All rights reserved.</footer>
+  </div>
+
+  <!-- Hover Player Card -->
+  <div class="player-card" id="playerCard"></div>
+
+  <!-- Overlay Spinner -->
+  <div class="overlay" id="overlay">
+    <div class="spinner-shell">
+      <div class="spinner"></div>
+      <div class="spinner-text" id="spinnerText">Generating squad...</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // =========================
+      // DATA SETS
+      // =========================
+
+      const formations = {
+        "3-1-4-2": [
+          "GK", "CB", "CB", "CB", "CDM",
+          "LM", "RM", "CM", "CAM",
+          "ST", "ST"
+        ],
+        "3-4-1-2": [
+          "GK", "CB", "CB", "CB",
+          "LM", "CM", "CM", "RM",
+          "CAM",
+          "ST", "ST"
+        ],
+        "3-4-3": [
+          "GK", "CB", "CB", "CB",
+          "LM", "CM", "CM", "RM",
+          "LW", "ST", "RW"
+        ],
+        "3-5-2": [
+          "GK", "CB", "CB", "CB",
+          "CDM", "CM", "CM", "CAM", "RM",
+          "ST", "ST"
+        ],
+        "3-4-2-1": [
+          "GK", "CB", "CB", "CB",
+          "LM", "CM", "CM", "RM",
+          "LF", "ST", "RF"
+        ],
+        "3-5-1-1": [
+          "GK", "CB", "CB", "CB",
+          "LM", "CM", "CDM", "CM", "RM",
+          "CAM",
+          "ST"
+        ],
+        "4-3-3 (Attack)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CAM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 (Defend)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 (Holding)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 (Flat)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CM", "CM", "CM",
+          "LW", "ST", "RW"
+        ],
+        "4-3-3 (False 9)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "LW", "CF", "RW"
+        ],
+        "4-2-3-1 (Narrow)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "CAM", "CAM", "CAM",
+          "ST"
+        ],
+        "4-2-3-1 (Wide)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "CAM", "LW", "RW",
+          "ST"
+        ],
+        "4-4-2": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CM", "LM",
+          "ST", "ST"
+        ],
+        "4-4-2 (Holding)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CDM", "CM", "LM",
+          "ST", "ST"
+        ],
+        "4-4-1-1": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CM", "LM",
+          "CF", "ST"
+        ],
+        "4-5-1": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CDM", "CM", "LM",
+          "ST"
+        ],
+        "4-5-1 (Attack)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "RM", "CM", "CAM", "CM", "LM",
+          "ST"
+        ],
+        "4-1-2-1-2 (Narrow)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM", "CAM",
+          "ST", "ST"
+        ],
+        "4-1-2-1-2 (Wide)": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM",
+          "RM", "LM",
+          "CAM",
+          "ST", "ST"
+        ],
+        "4-3-1-2": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "CAM",
+          "ST", "ST"
+        ],
+        "4-1-4-1": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM",
+          "RM", "CM", "CM", "LM",
+          "ST"
+        ],
+        "4-2-2-2": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "CAM", "CAM",
+          "ST", "ST"
+        ],
+        "4-2-4": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CDM",
+          "RW", "LW",
+          "ST", "ST"
+        ],
+        "4-3-2-1": [
+          "GK", "RB", "CB", "CB", "LB",
+          "CDM", "CM", "CM",
+          "LF", "RF", "ST"
+        ],
+        "5-2-1-2": [
+          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "CM", "CM",
+          "CAM",
+          "ST", "ST"
+        ],
+        "5-2-2-1": [
+          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "CM", "CM",
+          "RW", "LW",
+          "ST"
+        ],
+        "5-2-3": [
+          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "CM", "CM",
+          "RW", "ST", "LW"
+        ],
+        "5-3-2": [
+          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "CM", "CDM", "CM",
+          "ST", "ST"
+        ],
+        "5-4-1": [
+          "GK", "RWB", "CB", "CB", "CB", "LWB",
+          "RM", "CM", "CM", "LM",
+          "ST"
+        ]
+      };
+
+      const formationGroups = [
+        {
+          label: "3-back Systems",
+          items: [
+            "3-1-4-2",
+            "3-4-1-2",
+            "3-4-3",
+            "3-5-2",
+            "3-4-2-1",
+            "3-5-1-1"
+          ]
+        },
+        {
+          label: "4-back Systems",
+          items: [
+            "4-3-3 (Attack)",
+            "4-3-3 (Defend)",
+            "4-3-3 (Holding)",
+            "4-3-3 (Flat)",
+            "4-3-3 (False 9)",
+            "4-2-3-1 (Narrow)",
+            "4-2-3-1 (Wide)",
+            "4-4-2",
+            "4-4-2 (Holding)",
+            "4-4-1-1",
+            "4-5-1",
+            "4-5-1 (Attack)",
+            "4-1-2-1-2 (Narrow)",
+            "4-1-2-1-2 (Wide)",
+            "4-3-1-2",
+            "4-1-4-1",
+            "4-2-2-2",
+            "4-2-4",
+            "4-3-2-1"
+          ]
+        },
+        {
+          label: "5-back Systems",
+          items: [
+            "5-2-1-2",
+            "5-2-2-1",
+            "5-2-3",
+            "5-3-2",
+            "5-4-1"
+          ]
+        }
+      ];
+
+      const nationalities = [
+        "England", "France", "Spain", "Germany", "Italy", "Portugal",
+        "Netherlands", "Brazil", "Argentina", "Uruguay", "Colombia",
+        "Mexico", "USA", "Canada", "Japan", "South Korea", "Nigeria",
+        "Ghana", "Senegal", "Cameroon", "Morocco", "Algeria", "Turkey",
+        "Belgium", "Switzerland", "Poland", "Croatia", "Serbia", "Norway",
+        "Sweden", "Denmark", "Austria", "Czech Republic", "Chile", "Peru",
+        "Ecuador", "Australia", "New Zealand", "Ivory Coast", "DR Congo",
+        "Mali", "Egypt", "Tunisia", "Greece", "Russia", "Ukraine",
+        "Ireland", "Scotland"
+      ];
+
+      const potentialLabels = [
+        "Has Potential to be Special",
+        "Exciting Prospect",
+        "Showing Great Potential",
+        "Balanced Growth",
+        "Late Bloomer",
+        "Declining"
+      ];
+
+      const clubRoots = [
+        "Wichita", "Dar City", "Roma", "Harbour", "Highland", "Riverside",
+        "Kingsbridge", "Newcrest", "Eastfield", "Northgate", "Brightport",
+        "Stormford", "Greenhaven", "Skyview"
+      ];
+
+      const clubAdjectives = [
+        "United", "City", "Rovers", "Athletic", "Sporting", "Wanderers",
+        "Olympic", "Dynamos", "Rangers", "Phoenix", "Galaxy", "Titans",
+        "Lions", "Dragons"
+      ];
+
+      const stadiumNames = [
+        "Aurora", "Eclipse", "Summit", "Crescent", "Ironclad", "Emerald",
+        "Thunder", "Crown", "Liberty", "Vanguard", "Horizon", "Mirage",
+        "Crimson"
+      ];
+
+      const stadiumPrefixes = [
+        "Arena", "Stadium", "Park", "Ground", "Coliseum", "Dome", "Field"
+      ];
+
+      const crestStyles = [
+        "Shield with diagonal sash",
+        "Circle with central star",
+        "Minimal crown icon",
+        "Eagle with ball",
+        "Classic shield with laurel",
+        "Retro badge with stripes",
+        "Modern minimalist logo"
+      ];
+
+      const kitColorCombos = [
+        "Red & Black",
+        "Blue & White",
+        "Purple & Neon Green",
+        "Gold & Black",
+        "Teal & Navy",
+        "Orange & White",
+        "Maroon & Sky Blue",
+        "Yellow & Green",
+        "Black & Mint",
+        "White & Gold"
+      ];
+
+      const fanExpectations = [
+        "Chill (just avoid relegation)",
+        "Hopeful (mid-table & progress)",
+        "Demanding (push for Europe)",
+        "Obsessed (title or bust)"
+      ];
+
+      const rivals = [
+        "Westport Athletic",
+        "Summit City",
+        "Old Town FC",
+        "Coastal Rovers",
+        "Metro United",
+        "Capital Rangers",
+        "County Blues"
+      ];
+
+      const challengePools = {
+        Easy: [
+          "Avoid relegation and reach at least the round of 16 in one cup.",
+          "Finish mid-table and give minutes to at least 3 youth players.",
+          "Keep at least 10 clean sheets in all competitions.",
+          "Finish above your biggest rival in the league."
+        ],
+        Medium: [
+          "Reach a domestic cup semi-final and finish in the top half.",
+          "Qualify for Europe or win any domestic cup.",
+          "Sell one key player and rebuild without dropping below 7th.",
+          "Concede fewer than 45 league goals and finish top 8."
+        ],
+        Hard: [
+          "Win the league or a major cup within 2 seasons.",
+          "Achieve a domestic double or reach a European final.",
+          "Maintain a positive net spend and still qualify for Champions League.",
+          "Win the title with at least 5 academy graduates playing 15+ games."
+        ]
+      };
+
+      const narrativeEras = [
+        "Youth Revolution: The board demands a long-term project built around academy graduates.",
+        "Takeover Era: A new billionaire owner expects instant trophies and marquee signings.",
+        "Crisis Mode: Financial trouble forces you to sell stars and survive with bargains.",
+        "Legacy Push: A legendary manager is in his final years; trophies or bust.",
+        "Sleeping Giant: Once-great club trying to wake up and return to the top.",
+        "Relegation Trauma: Recovering from a relegation disaster, fans are nervous but hopeful."
+      ];
+
+      const boardMoods = [
+        "Board Mood: Calm but watchful – finish above mid-table and avoid humiliating cup exits.",
+        "Board Mood: Ambitious – push for European spots and play attractive football.",
+        "Board Mood: Ruthless – two bad months and your job is at risk.",
+        "Board Mood: Patient – performances matter more than trophies this season."
+      ];
+
+      const financialEvents = [
+        "Financial Event: Surprise sponsorship deal – extra transfer budget in January.",
+        "Financial Event: Stadium renovation – reduced budget but increased future income.",
+        "Financial Event: Wage cap introduced – you must keep overall wage bill under control.",
+        "Financial Event: Tax investigation – transfer budget locked until next season."
+      ];
+
+      // =========================
+      // UTILS
+      // =========================
+
+      function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function pickRandom(arr) {
+        if (!arr || arr.length === 0) return null;
+        const idx = Math.floor(Math.random() * arr.length);
+        return arr[idx];
+      }
+
+      function weightedPick(weights) {
+        const total = weights.reduce((sum, w) => sum + w.weight, 0);
+        let r = Math.random() * total;
+        for (const w of weights) {
+          if (r < w.weight) return w.value;
+          r -= w.weight;
+        }
+        return weights[weights.length - 1].value;
+      }
+
+      function classifyOvr(ovr) {
+        if (ovr <= 77) return "ovr-low";
+        if (ovr <= 82) return "ovr-mid";
+        return "ovr-high";
+      }
+
+      // =========================
+      // DOM HOOKS
+      // =========================
+
+      const themeSelect = document.getElementById("themeSelect");
+
+      // Club
+      const clubNameEl = document.getElementById("clubName");
+      const stadiumNameEl = document.getElementById("stadiumName");
+      const clubBudgetTagEl = document.getElementById("clubBudgetTag");
+      const fanExpectationsTagEl = document.getElementById("fanExpectationsTag");
+      const budgetValueEl = document.getElementById("budgetValue");
+      const crestStyleEl = document.getElementById("crestStyle");
+      const kitColorsEl = document.getElementById("kitColors");
+      const rivalClubEl = document.getElementById("rivalClub");
+      const challengeTierSelect = document.getElementById("challengeTierSelect");
+      const challengeSummaryEl = document.getElementById("challengeSummary");
+      const generateClubBtn = document.getElementById("generateClubBtn");
+      const shuffleChallengeBtn = document.getElementById("shuffleChallengeBtn");
+      const lockClubToggle = document.getElementById("lockClubToggle");
+
+      const addNarrativeEra = document.getElementById("addNarrativeEra");
+      const addBoardMood = document.getElementById("addBoardMood");
+      const addFinancialEvent = document.getElementById("addFinancialEvent");
+      const enableStoryPanel = document.getElementById("enableStoryPanel");
+
+      // Squad settings
+      const formationSelect = document.getElementById("formationSelect");
+      const formationHint = document.getElementById("formationHint");
+      const squadSizeSelect = document.getElementById("squadSizeSelect");
+      const ovrPresetSelect = document.getElementById("ovrPresetSelect");
+      const ovrMinInput = document.getElementById("ovrMinInput");
+      const ovrMaxInput = document.getElementById("ovrMaxInput");
+
+      const attrNationality = document.getElementById("attrNationality");
+      const attrHeight = document.getElementById("attrHeight");
+      const attrFoot = document.getElementById("attrFoot");
+      const attrWeakFoot = document.getElementById("attrWeakFoot");
+      const attrSkillMoves = document.getElementById("attrSkillMoves");
+      const attrPotential = document.getElementById("attrPotential");
+      const realismToggle = document.getElementById("realismToggle");
+
+      const generateSquadBtn = document.getElementById("generateSquadBtn");
+      const addPlayerBtn = document.getElementById("addPlayerBtn");
+      const clearSquadBtn = document.getElementById("clearSquadBtn");
+
+      // Squad table
+      const tableHeaderRow = document.getElementById("tableHeaderRow");
+      const squadBodyEl = document.getElementById("squadBody");
+      const squadSummaryEl = document.getElementById("squadSummary");
+
+      // Story + export
+      const storyCard = document.getElementById("storyCard");
+      const storyBodyEl = document.getElementById("storyBody");
+      const storyEmptyEl = document.getElementById("storyEmpty");
+      const toggleStoryCollapseBtn = document.getElementById("toggleStoryCollapseBtn");
+      const storyPromptInput = document.getElementById("storyPromptInput");
+      const storyUserAddon = document.getElementById("storyUserAddon");
+      const exportTextEl = document.getElementById("exportText");
+      const presetNameInput = document.getElementById("presetNameInput");
+      const presetSelect = document.getElementById("presetSelect");
+      const savePresetBtn = document.getElementById("savePresetBtn");
+      const loadPresetBtn = document.getElementById("loadPresetBtn");
+      const deletePresetBtn = document.getElementById("deletePresetBtn");
+      const customChallengeInput = document.getElementById("customChallengeInput");
+
+      // Player hover card
+      const playerCardEl = document.getElementById("playerCard");
+
+      // Overlay
+      const overlayEl = document.getElementById("overlay");
+      const spinnerTextEl = document.getElementById("spinnerText");
+
+      // =========================
+      // STATE
+      // =========================
+
+      const PRESET_KEY = "fcGeneratorPresets_v1";
+      let currentClub = null;
+      let currentStory = "";
+      let players = [];
+
+      // =========================
+      // THEME HANDLING
+      // =========================
+
+      themeSelect.addEventListener("change", () => {
+        const theme = themeSelect.value;
+        document.documentElement.setAttribute("data-theme", theme);
+      });
+
+      // =========================
+      // FORMATION SELECT SETUP
+      // =========================
+
+      function populateFormationSelect() {
+        formationSelect.innerHTML = "";
+        formationGroups.forEach(group => {
+          const optGroup = document.createElement("optgroup");
+          optGroup.label = group.label;
+          group.items.forEach(name => {
+            if (!formations[name]) return;
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            optGroup.appendChild(opt);
+          });
+          formationSelect.appendChild(optGroup);
+        });
+        // default select first option
+        const firstValue = formationGroups[0].items[0];
+        formationSelect.value = firstValue;
+        formationHint.textContent = `Current: ${firstValue}`;
+      }
+
+      formationSelect.addEventListener("change", () => {
+        formationHint.textContent = `Current: ${formationSelect.value}`;
+      });
+
+      // =========================
+      // OVR PRESETS
+      // =========================
+
+      function applyOvrPreset(preset) {
+        let min = 70, max = 82;
+        switch (preset) {
+          case "youth":
+            min = 60; max = 76; break;
+          case "contender":
+            min = 75; max = 85; break;
+          case "super":
+            min = 80; max = 90; break;
+          case "chaos":
+            min = 50; max = 95; break;
+          case "balanced":
+            min = 70; max = 82; break;
+          case "custom":
+            // keep current, just unlock inputs
+            ovrMinInput.disabled = false;
+            ovrMaxInput.disabled = false;
+            return;
+        }
+        ovrMinInput.value = min;
+        ovrMaxInput.value = max;
+        if (preset === "custom") {
+          ovrMinInput.disabled = false;
+          ovrMaxInput.disabled = false;
+        } else {
+          ovrMinInput.disabled = false;
+          ovrMaxInput.disabled = false;
+        }
+      }
+
+      ovrPresetSelect.addEventListener("change", () => {
+        applyOvrPreset(ovrPresetSelect.value);
+        if (ovrPresetSelect.value === "custom") {
+          ovrMinInput.disabled = false;
+          ovrMaxInput.disabled = false;
+        } else {
+          ovrMinInput.disabled = false;
+          ovrMaxInput.disabled = false;
+        }
+      });
+
+      // =========================
+      // PLAYER GENERATION
+      // =========================
+
+      function generateAge(position) {
+        const realism = realismToggle.checked;
+
+        if (!realism) {
+          const tier = weightedPick([
+            { value: "young", weight: 50 },
+            { value: "prime", weight: 35 },
+            { value: "veteran", weight: 15 }
+          ]);
+          if (tier === "young") return randInt(16, 23);
+          if (tier === "prime") return randInt(24, 29);
+          return randInt(30, 36);
+        }
+
+        // realism: GK a bit older, defenders older than wingers
+        if (position === "GK") {
+          return weightedPick([
+            { value: randInt(20, 24), weight: 20 },
+            { value: randInt(25, 30), weight: 45 },
+            { value: randInt(31, 37), weight: 35 }
+          ]);
+        }
+        if (["CB", "RB", "LB", "RWB", "LWB"].includes(position)) {
+          return weightedPick([
+            { value: randInt(19, 23), weight: 25 },
+            { value: randInt(24, 29), weight: 50 },
+            { value: randInt(30, 34), weight: 25 }
+          ]);
+        }
+        if (["CM", "CDM", "CAM"].includes(position)) {
+          return weightedPick([
+            { value: randInt(18, 23), weight: 30 },
+            { value: randInt(24, 29), weight: 45 },
+            { value: randInt(30, 33), weight: 25 }
+          ]);
+        }
+        // wingers & strikers
+        return weightedPick([
+          { value: randInt(17, 22), weight: 40 },
+          { value: randInt(23, 28), weight: 45 },
+          { value: randInt(29, 33), weight: 15 }
+        ]);
+      }
+
+      function generateOvr() {
+        const min = Number(ovrMinInput.value) || 60;
+        const max = Number(ovrMaxInput.value) || 85;
+        const midRange = max - min;
+
+        // Weighted toward middle slightly
+        const roll = Math.random();
+        if (roll < 0.2) {
+          // lower band
+          return randInt(min, min + Math.floor(midRange * 0.4));
+        } else if (roll < 0.8) {
+          // mid band
+          return randInt(min + Math.floor(midRange * 0.2), max - Math.floor(midRange * 0.2));
+        } else {
+          // high band
+          return randInt(max - Math.floor(midRange * 0.4), max);
+        }
+      }
+
+      function generateHeight(position) {
+        if (position === "GK") return randInt(188, 203);
+        if (["CB"].includes(position)) return randInt(183, 196);
+        if (["RB", "LB", "RWB", "LWB"].includes(position)) return randInt(174, 185);
+        if (["CM", "CDM", "CAM"].includes(position)) return randInt(172, 186);
+        if (["LW", "RW", "LM", "RM", "LF", "RF"].includes(position)) return randInt(168, 183);
+        if (["ST"].includes(position)) return randInt(175, 193);
+        return randInt(170, 190);
+      }
+
+      function formatHeight(cm) {
+        const inches = Math.round(cm / 2.54);
+        const ft = Math.floor(inches / 12);
+        const inch = inches % 12;
+        return `${cm} cm (${ft}'${inch}")`;
+      }
+
+      function generateFoot() {
+        return weightedPick([
+          { value: "Right", weight: 78 },
+          { value: "Left", weight: 22 }
+        ]);
+      }
+
+      function generateWeakFoot(position) {
+        const base = ["ST", "LW", "RW", "LF", "RF", "CAM"].includes(position) ? 3 : 2;
+        let wf = base + randInt(0, 2);
+        return Math.min(5, wf);
+      }
+
+      function generateSkillMoves(position) {
+        const base = ["ST", "LW", "RW", "LF", "RF", "CAM"].includes(position) ? 3 : 2;
+        let sm = base + randInt(0, 2);
+        return Math.min(5, sm);
+      }
+
+      function generatePotential(age) {
+        const realism = realismToggle.checked;
+        if (!realism) {
+          // Similar regardless of age
+          if (age <= 21) {
+            return weightedPick([
+              { value: potentialLabels[0], weight: 25 },
+              { value: potentialLabels[1], weight: 30 },
+              { value: potentialLabels[2], weight: 25 },
+              { value: potentialLabels[3], weight: 15 },
+              { value: potentialLabels[4], weight: 5 },
+              { value: potentialLabels[5], weight: 0 }
+            ]);
+          } else if (age <= 26) {
+            return weightedPick([
+              { value: potentialLabels[1], weight: 15 },
+              { value: potentialLabels[2], weight: 25 },
+              { value: potentialLabels[3], weight: 35 },
+              { value: potentialLabels[4], weight: 15 },
+              { value: potentialLabels[5], weight: 10 }
+            ]);
+          } else if (age <= 30) {
+            return weightedPick([
+              { value: potentialLabels[2], weight: 10 },
+              { value: potentialLabels[3], weight: 40 },
+              { value: potentialLabels[4], weight: 25 },
+              { value: potentialLabels[5], weight: 25 }
+            ]);
+          } else {
+            return weightedPick([
+              { value: potentialLabels[3], weight: 15 },
+              { value: potentialLabels[4], weight: 25 },
+              { value: potentialLabels[5], weight: 60 }
+            ]);
+          }
+        }
+
+        // more realism: young players have better labels
+        if (age <= 20) {
+          return weightedPick([
+            { value: potentialLabels[0], weight: 30 },
+            { value: potentialLabels[1], weight: 30 },
+            { value: potentialLabels[2], weight: 25 },
+            { value: potentialLabels[3], weight: 10 },
+            { value: potentialLabels[4], weight: 5 }
+          ]);
+        } else if (age <= 24) {
+          return weightedPick([
+            { value: potentialLabels[1], weight: 20 },
+            { value: potentialLabels[2], weight: 30 },
+            { value: potentialLabels[3], weight: 35 },
+            { value: potentialLabels[4], weight: 10 },
+            { value: potentialLabels[5], weight: 5 }
+          ]);
+        } else if (age <= 28) {
+          return weightedPick([
+            { value: potentialLabels[2], weight: 10 },
+            { value: potentialLabels[3], weight: 40 },
+            { value: potentialLabels[4], weight: 25 },
+            { value: potentialLabels[5], weight: 25 }
+          ]);
+        } else {
+          return weightedPick([
+            { value: potentialLabels[3], weight: 20 },
+            { value: potentialLabels[4], weight: 30 },
+            { value: potentialLabels[5], weight: 50 }
+          ]);
+        }
+      }
+
+      function generatePlayer(position, index) {
+        const age = generateAge(position);
+        const ovr = generateOvr();
+        const nationality = pickRandom(nationalities);
+        const heightCm = generateHeight(position);
+        const potential = generatePotential(age);
+        const foot = generateFoot();
+        const wf = generateWeakFoot(position);
+        const sm = generateSkillMoves(position);
+
+        return {
+          index,
+          position,
+          age,
+          ovr,
+          nationality,
+          heightCm,
+          potential,
+          foot,
+          wf,
+          sm
+        };
+      }
+
+      function buildPositionPool(formationName, squadSize) {
+        const base = formations[formationName] || formations["4-3-3 (Holding)"];
+        const positions = [...base];
+        const extraNeeded = Math.max(0, squadSize - base.length);
+
+        const extraOrder = [
+          "GK", "CB", "CB", "RB", "LB",
+          "CDM", "CM", "CM",
+          "CAM",
+          "LW", "RW",
+          "ST", "ST"
+        ];
+
+        let idx = 0;
+        for (let i = 0; i < extraNeeded; i++) {
+          positions.push(extraOrder[idx % extraOrder.length]);
+          idx++;
+        }
+        return positions;
+      }
+
+      // =========================
+      // TABLE RENDERING
+      // =========================
+
+      function buildTableHeader() {
+        tableHeaderRow.innerHTML = "";
+
+        const cols = [];
+
+        function addCol(key, label) {
+          cols.push({ key, label });
+        }
+
+        addCol("num", "#");
+        addCol("pos", "POS");
+        addCol("age", "AGE");
+        addCol("ovr", "OVR");
+        if (attrNationality.checked) addCol("nationality", "NATION");
+        if (attrHeight.checked) addCol("heightCm", "HEIGHT");
+        if (attrFoot.checked) addCol("foot", "FOOT");
+        if (attrWeakFoot.checked) addCol("wf", "WF");
+        if (attrSkillMoves.checked) addCol("sm", "SM");
+        if (attrPotential.checked) addCol("potential", "POTENTIAL");
+
+        tableHeaderRow.dataset.columns = JSON.stringify(cols.map(c => c.key));
+
+        cols.forEach(col => {
+          const th = document.createElement("th");
+          th.textContent = col.label;
+          tableHeaderRow.appendChild(th);
+        });
+      }
+
+      function renderSquadTable() {
+        buildTableHeader();
+        const cols = JSON.parse(tableHeaderRow.dataset.columns || "[]");
+
+        squadBodyEl.innerHTML = "";
+        if (!players.length) return;
+
+        players.forEach((p, idx) => {
+          const tr = document.createElement("tr");
+          tr.classList.add(idx < 11 ? "starter" : "sub");
+
+          cols.forEach(colKey => {
+            const td = document.createElement("td");
+
+            switch (colKey) {
+              case "num":
+                td.textContent = idx + 1;
+                break;
+              case "pos":
+                td.textContent = p.position;
+                td.className = "pos-cell";
+                break;
+              case "age": {
+                const tier = p.age <= 22 ? "Y" : p.age <= 28 ? "P" : "V";
+                td.innerHTML = `${p.age} <span class="age-tag">(${tier})</span>`;
+                break;
+              }
+              case "ovr": {
+                const span = document.createElement("span");
+                span.textContent = p.ovr;
+                span.className = `ovr-cell ${classifyOvr(p.ovr)}`;
+                td.appendChild(span);
+                break;
+              }
+              case "nationality":
+                td.textContent = p.nationality;
+                break;
+              case "heightCm":
+                td.textContent = formatHeight(p.heightCm);
+                break;
+              case "foot":
+                td.textContent = p.foot;
+                break;
+              case "wf":
+                td.textContent = `${p.wf}★`;
+                break;
+              case "sm":
+                td.textContent = `${p.sm}★`;
+                break;
+              case "potential":
+                td.textContent = p.potential;
+                break;
+            }
+
+            tr.appendChild(td);
+          });
+
+          tr.addEventListener("mouseenter", (e) => {
+            showPlayerCard(p, e.currentTarget);
+          });
+          tr.addEventListener("mouseleave", () => {
+            hidePlayerCard();
+          });
+
+          squadBodyEl.appendChild(tr);
+        });
+
+        // summary
+        const avgOvr = (players.reduce((sum, p) => sum + p.ovr, 0) / players.length).toFixed(1);
+        const avgAge = (players.reduce((sum, p) => sum + p.age, 0) / players.length).toFixed(1);
+        const depthInfo = players.length > 22 ? "Mega squad" : players.length >= 18 ? "Matchday depth+" : "Compact squad";
+        squadSummaryEl.textContent = `${players.length} players · Avg OVR ${avgOvr} · Avg Age ${avgAge} · ${depthInfo}`;
+        squadSummaryEl.classList.add("badge", "green");
+
+        updateExportText();
+      }
+
+      // =========================
+      // PLAYER HOVER CARD
+      // =========================
+
+      function showPlayerCard(player, rowEl) {
+        const rect = rowEl.getBoundingClientRect();
+        const card = playerCardEl;
+        const viewportWidth = window.innerWidth;
+
+        let left = rect.right + 14;
+        if (left + 260 > viewportWidth) {
+          left = rect.left - 260;
+        }
+        let top = rect.top + window.scrollY - 4;
+
+        card.style.left = `${left}px`;
+        card.style.top = `${top}px`;
+
+        // Build dynamic rows depending on toggles
+        let rows = `
+          <div class="pc-row">
+            <span class="pc-label">Age</span>
+            <span>${player.age}</span>
+          </div>
+        `;
+
+        if (attrHeight.checked) {
+          rows += `
+            <div class="pc-row">
+              <span class="pc-label">Height</span>
+              <span>${formatHeight(player.heightCm)}</span>
+            </div>
+          `;
+        }
+
+        if (attrFoot.checked) {
+          rows += `
+            <div class="pc-row">
+              <span class="pc-label">Foot</span>
+              <span>${player.foot}</span>
+            </div>
+          `;
+        }
+
+        if (attrWeakFoot.checked) {
+          rows += `
+            <div class="pc-row">
+              <span class="pc-label">Weak Foot</span>
+              <span>${player.wf}★</span>
+            </div>
+          `;
+        }
+
+        if (attrSkillMoves.checked) {
+          rows += `
+            <div class="pc-row">
+              <span class="pc-label">Skill Moves</span>
+              <span>${player.sm}★</span>
+            </div>
+          `;
+        }
+
+        if (attrPotential.checked) {
+          rows += `
+            <div class="pc-row">
+              <span class="pc-label">Potential</span>
+              <span>${player.potential}</span>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="pc-header">
+            <div>
+              <div class="pc-pos">${player.position}</div>
+              ${attrNationality.checked ? `<div class="pc-nat">${player.nationality}</div>` : ""}
+            </div>
+            <div class="pc-ovr ${classifyOvr(player.ovr)}">${player.ovr}</div>
+          </div>
+          ${rows}
+        `;
+
+        card.classList.add("visible");
+      }
+
+      function hidePlayerCard() {
+        playerCardEl.classList.remove("visible");
+      }
+
+      // =========================
+      // CLUB GENERATION
+      // =========================
+
+      function generateClubIdentity() {
+        const root = pickRandom(clubRoots);
+        const adj = pickRandom(clubAdjectives);
+        const name = `${root} ${adj}`;
+
+        const stadiumCore = pickRandom(stadiumNames);
+        const stadiumType = pickRandom(stadiumPrefixes);
+        const stadium = `${stadiumCore} ${stadiumType}`;
+
+        const level = weightedPick([
+          { value: "Poor", weight: 30 },
+          { value: "Mid", weight: 40 },
+          { value: "Rich", weight: 22 },
+          { value: "Sugar Daddy", weight: 8 }
+        ]);
+
+        let budgetMin, budgetMax;
+        if (level === "Poor") {
+          budgetMin = 2; budgetMax = 12;
+        } else if (level === "Mid") {
+          budgetMin = 15; budgetMax = 35;
+        } else if (level === "Rich") {
+          budgetMin = 40; budgetMax = 80;
+        } else {
+          budgetMin = 100; budgetMax = 200;
+        }
+        const budget = randInt(budgetMin, budgetMax);
+        const crest = pickRandom(crestStyles);
+        const kit = pickRandom(kitColorCombos);
+        const fans = pickRandom(fanExpectations);
+        const rival = pickRandom(rivals);
+
+        return { name, stadium, level, budget, crest, kit, fans, rival };
+      }
+
+      function refreshClubUI() {
+        if (!currentClub) return;
+        const { name, stadium, level, budget, crest, kit, fans, rival } = currentClub;
+
+        clubNameEl.textContent = name;
+        stadiumNameEl.textContent = stadium;
+        clubBudgetTagEl.textContent = `Budget tier: ${level}`;
+        fanExpectationsTagEl.textContent = `Fans: ${fans}`;
+        budgetValueEl.textContent = `${budget}M transfer budget (est.)`;
+        crestStyleEl.textContent = `Crest: ${crest}`;
+        kitColorsEl.textContent = kit;
+        rivalClubEl.textContent = rival;
+      }
+
+      function generateChallenge() {
+        const custom = (customChallengeInput.value || "").trim();
+        if (custom) {
+          challengeSummaryEl.textContent = `[Custom] ${custom}`;
+          return { tier: "Custom", objective: custom, custom: true };
+        }
+        const tier = challengeTierSelect.value || "Medium";
+        const pool = challengePools[tier] || challengePools.Medium;
+        const objective = pickRandom(pool);
+        challengeSummaryEl.textContent = `[${tier}] ${objective}`;
+        return { tier, objective };
+      }
+
+      generateClubBtn.addEventListener("click", () => {
+        currentClub = generateClubIdentity();
+        refreshClubUI();
+        const challenge = generateChallenge();
+        generateStory(challenge);
+        updateExportText();
+      });
+
+      shuffleChallengeBtn.addEventListener("click", () => {
+        const challenge = generateChallenge();
+        generateStory(challenge);
+        updateExportText();
+      });
+
+      // =========================
+      // STORY GENERATION
+      // =========================
+
+      function generateStory(challengeInfo) {
+        if (!enableStoryPanel.checked) {
+          currentStory = "";
+          storyBodyEl.textContent = "Story panel disabled. Enable it in Club card to generate narrative flavour.";
+          return;
+        }
+
+        const parts = [];
+        if (currentClub) {
+          parts.push(
+            `You take charge of ${currentClub.name}, playing home games at ${currentClub.stadium}.`,
+            `The club is classified as a ${currentClub.level.toLowerCase()} budget side with an estimated transfer kitty of around ${currentClub.budget}M.`,
+            `Your fiercest rival is ${currentClub.rival}, and the fans are ${currentClub.fans.toLowerCase()}.`
+          );
+        }
+
+        if (addNarrativeEra.checked) {
+          parts.push(pickRandom(narrativeEras));
+        }
+        if (addBoardMood.checked) {
+          parts.push(pickRandom(boardMoods));
+        }
+        if (addFinancialEvent.checked) {
+          parts.push(pickRandom(financialEvents));
+        }
+
+        const prompt = (storyPromptInput.value || "").trim();
+        if (prompt) {
+          parts.push(`User prompt focus: ${prompt}.`);
+        }
+
+        if (challengeInfo) {
+          parts.push(
+            `Season Objective: ${challengeInfo.objective} (Difficulty: ${challengeInfo.tier}).`
+          );
+        }
+
+        const userAddon = (storyUserAddon.value || "").trim();
+        if (userAddon) {
+          parts.push(userAddon);
+        }
+
+        currentStory = parts.join("\n\n");
+        storyBodyEl.textContent = currentStory || "No story generated yet.";
+      }
+
+      enableStoryPanel.addEventListener("change", () => {
+        if (!enableStoryPanel.checked) {
+          storyBodyEl.textContent = "Story panel disabled. Enable it in Club card to generate narrative flavour.";
+        } else {
+          generateStory({ tier: challengeTierSelect.value, objective: challengeSummaryEl.textContent || "" });
+        }
+        updateExportText();
+      });
+
+      toggleStoryCollapseBtn.addEventListener("click", () => {
+        const collapsed = storyCard.classList.toggle("story-collapsed");
+        if (collapsed) {
+          toggleStoryCollapseBtn.textContent = "Expand";
+          storyBodyEl.style.display = "none";
+          storyEmptyEl.style.display = "block";
+        } else {
+          toggleStoryCollapseBtn.textContent = "Collapse";
+          storyBodyEl.style.display = "block";
+          storyEmptyEl.style.display = "none";
+        }
+      });
+
+      // =========================
+      // EXPORT TEXT
+      // =========================
+
+      function updateExportText() {
+        const lines = [];
+
+        if (currentClub) {
+          lines.push("=== CLUB IDENTITY ===");
+          lines.push(`Club: ${currentClub.name}`);
+          lines.push(`Stadium: ${currentClub.stadium}`);
+          lines.push(`Approx. Budget: ${currentClub.budget}M (${currentClub.level} tier)`);
+          lines.push(`Fans: ${currentClub.fans}`);
+          lines.push(`Kit Identity: ${currentClub.kit}`);
+          lines.push(`Crest Style: ${currentClub.crest}`);
+          lines.push(`Rival: ${currentClub.rival}`);
+          lines.push("");
+        }
+
+        if (challengeSummaryEl.textContent) {
+          lines.push("=== SEASON CHALLENGE ===");
+          lines.push(challengeSummaryEl.textContent);
+          lines.push("");
+        }
+
+        if (players.length) {
+          lines.push("=== SQUAD OVERVIEW ===");
+          const avgOvr = (players.reduce((s, p) => s + p.ovr, 0) / players.length).toFixed(1);
+          const avgAge = (players.reduce((s, p) => s + p.age, 0) / players.length).toFixed(1);
+          lines.push(`Total players: ${players.length}`);
+          lines.push(`Average OVR: ${avgOvr}`);
+          lines.push(`Average Age: ${avgAge}`);
+          lines.push(`Formation: ${formationSelect.value}`);
+          lines.push("");
+          lines.push("Players (Starters 1–11 / Subs 12+):");
+
+          players.forEach((p, idx) => {
+            const slot = idx + 1;
+            const status = slot <= 11 ? "Starter" : "Sub";
+            const attrs = [
+              `POS ${p.position}`,
+              `OVR ${p.ovr}`,
+              `Age ${p.age}`,
+            ];
+            if (attrNationality.checked) attrs.push(p.nationality);
+            if (attrHeight.checked) attrs.push(formatHeight(p.heightCm));
+            if (attrFoot.checked) attrs.push(`${p.foot}-footed`);
+            if (attrWeakFoot.checked) attrs.push(`WF ${p.wf}★`);
+            if (attrSkillMoves.checked) attrs.push(`SM ${p.sm}★`);
+            if (attrPotential.checked) attrs.push(p.potential);
+
+            lines.push(
+              `${slot}. [${status}] ${attrs.join(" | ")}`
+            );
+          });
+
+          lines.push("");
+        }
+
+        if (currentStory && enableStoryPanel.checked) {
+          lines.push("=== CAREER STORY HOOK ===");
+          lines.push(currentStory);
+        }
+
+        exportTextEl.value = lines.join("\n");
+      }
+
+      // =========================
+      // OVERLAY SPINNER HELPERS
+      // =========================
+
+      function runWithOverlay(message, fn) {
+        spinnerTextEl.textContent = message;
+        overlayEl.classList.add("visible");
+        generateSquadBtn.disabled = true;
+        addPlayerBtn.disabled = true;
+        clearSquadBtn.disabled = true;
+
+        setTimeout(() => {
+          try {
+            fn();
+          } finally {
+            overlayEl.classList.remove("visible");
+            generateSquadBtn.disabled = false;
+            addPlayerBtn.disabled = false;
+            clearSquadBtn.disabled = false;
+          }
+        }, 3000); // full 3-second animation
+      }
+
+      // =========================
+      // SQUAD GENERATION HANDLERS
+      // =========================
+
+      function generateFullSquad() {
+        if (!lockClubToggle.checked && !currentClub) {
+          currentClub = generateClubIdentity();
+          refreshClubUI();
+        }
+        if (!challengeSummaryEl.textContent || challengeSummaryEl.textContent.includes("Click Generate")) {
+          generateChallenge();
+        }
+        const challengeInfo = {
+          tier: challengeTierSelect.value,
+          objective: challengeSummaryEl.textContent || ""
+        };
+        generateStory(challengeInfo);
+
+        const formationName = formationSelect.value;
+        const squadSize = Number(squadSizeSelect.value);
+        const positions = buildPositionPool(formationName, squadSize);
+
+        players = positions.map((pos, idx) => generatePlayer(pos, idx));
+        renderSquadTable();
+      }
+
+      function addOnePlayer() {
+        if (!players.length) {
+          generateFullSquad();
+          return;
+        }
+        const formationName = formationSelect.value;
+        const positions = buildPositionPool(formationName, players.length + 1);
+        const newPos = positions[players.length] || "CM";
+        const newPlayer = generatePlayer(newPos, players.length);
+        players.push(newPlayer);
+        renderSquadTable();
+      }
+
+      generateSquadBtn.addEventListener("click", () => {
+        runWithOverlay("Generating squad...", generateFullSquad);
+      });
+
+      addPlayerBtn.addEventListener("click", () => {
+        addOnePlayer();
+      });
+
+      clearSquadBtn.addEventListener("click", () => {
+        players = [];
+        squadBodyEl.innerHTML = "";
+        squadSummaryEl.textContent = "Squad cleared. Generate a new one to begin.";
+        hidePlayerCard();
+        updateExportText();
+      });
+
+      // When attribute toggles change, rebuild table headers + rows
+      [
+        attrNationality,
+        attrHeight,
+        attrFoot,
+        attrWeakFoot,
+        attrSkillMoves,
+        attrPotential
+      ].forEach(el => {
+        el.addEventListener("change", () => {
+          if (players.length) {
+            renderSquadTable();
+          } else {
+            buildTableHeader();
+          }
+        });
+      });
+
+      customChallengeInput.addEventListener("input", () => {
+        const val = (customChallengeInput.value || "").trim();
+        if (val) {
+          challengeSummaryEl.textContent = `[Custom] ${val}`;
+        } else if (!challengeSummaryEl.textContent || challengeSummaryEl.textContent.startsWith("[Custom]")) {
+          generateChallenge();
+        }
+        if (enableStoryPanel.checked) {
+          generateStory({ tier: challengeTierSelect.value, objective: challengeSummaryEl.textContent || "" });
+        }
+        updateExportText();
+      });
+
+      [storyPromptInput, storyUserAddon].forEach(el => {
+        el.addEventListener("input", () => {
+          if (enableStoryPanel.checked) {
+            generateStory({ tier: challengeTierSelect.value, objective: challengeSummaryEl.textContent || "" });
+          }
+          updateExportText();
+        });
+      });
+
+      // Ripple effect for buttons
+      document.addEventListener("click", (event) => {
+        const target = event.target.closest("button");
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const ripple = document.createElement("span");
+        ripple.className = "ripple";
+        ripple.style.width = ripple.style.height = `${size}px`;
+        ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+        ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+        target.appendChild(ripple);
+        ripple.addEventListener("animationend", () => ripple.remove());
+      });
+
+      // =========================
+      // PRESET HANDLERS
+      // =========================
+
+      function getPresetsMap() {
+        try {
+          return JSON.parse(localStorage.getItem(PRESET_KEY)) || {};
+        } catch (e) {
+          console.warn("Could not read presets", e);
+          return {};
+        }
+      }
+
+      function setPresetsMap(map) {
+        localStorage.setItem(PRESET_KEY, JSON.stringify(map));
+      }
+
+      function refreshPresetSelect() {
+        const map = getPresetsMap();
+        presetSelect.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select preset";
+        presetSelect.appendChild(placeholder);
+        Object.keys(map).forEach(name => {
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          presetSelect.appendChild(opt);
+        });
+      }
+
+      function savePreset() {
+        const name = (presetNameInput.value || "").trim() || "My Preset";
+        const map = getPresetsMap();
+        map[name] = {
+          club: currentClub,
+          players,
+          formation: formationSelect.value,
+          squadSize: squadSizeSelect.value,
+          theme: themeSelect.value,
+          challenge: {
+            tier: challengeTierSelect.value,
+            summary: challengeSummaryEl.textContent,
+            custom: customChallengeInput.value
+          },
+          story: {
+            enable: enableStoryPanel.checked,
+            addNarrativeEra: addNarrativeEra.checked,
+            addBoardMood: addBoardMood.checked,
+            addFinancialEvent: addFinancialEvent.checked,
+            prompt: storyPromptInput.value,
+            addon: storyUserAddon.value,
+            currentStory
+          },
+          toggles: {
+            attrNationality: attrNationality.checked,
+            attrHeight: attrHeight.checked,
+            attrFoot: attrFoot.checked,
+            attrWeakFoot: attrWeakFoot.checked,
+            attrSkillMoves: attrSkillMoves.checked,
+            attrPotential: attrPotential.checked,
+            realismToggle: realismToggle.checked
+          },
+          ovr: {
+            min: ovrMinInput.value,
+            max: ovrMaxInput.value,
+            preset: ovrPresetSelect.value
+          }
+        };
+        setPresetsMap(map);
+        refreshPresetSelect();
+        presetSelect.value = name;
+      }
+
+      function applyPreset(name) {
+        const map = getPresetsMap();
+        const data = map[name];
+        if (!data) return;
+
+        themeSelect.value = data.theme || themeSelect.value;
+        document.documentElement.setAttribute("data-theme", themeSelect.value);
+
+        currentClub = data.club || null;
+        refreshClubUI();
+
+        challengeTierSelect.value = data.challenge?.tier || "Medium";
+        customChallengeInput.value = data.challenge?.custom || "";
+        challengeSummaryEl.textContent = data.challenge?.summary || "Click Generate Club to roll a challenge.";
+
+        addNarrativeEra.checked = data.story?.addNarrativeEra ?? addNarrativeEra.checked;
+        addBoardMood.checked = data.story?.addBoardMood ?? addBoardMood.checked;
+        addFinancialEvent.checked = data.story?.addFinancialEvent ?? addFinancialEvent.checked;
+        enableStoryPanel.checked = data.story?.enable ?? enableStoryPanel.checked;
+        storyPromptInput.value = data.story?.prompt || "";
+        storyUserAddon.value = data.story?.addon || "";
+
+        attrNationality.checked = data.toggles?.attrNationality ?? attrNationality.checked;
+        attrHeight.checked = data.toggles?.attrHeight ?? attrHeight.checked;
+        attrFoot.checked = data.toggles?.attrFoot ?? attrFoot.checked;
+        attrWeakFoot.checked = data.toggles?.attrWeakFoot ?? attrWeakFoot.checked;
+        attrSkillMoves.checked = data.toggles?.attrSkillMoves ?? attrSkillMoves.checked;
+        attrPotential.checked = data.toggles?.attrPotential ?? attrPotential.checked;
+        realismToggle.checked = data.toggles?.realismToggle ?? realismToggle.checked;
+
+        ovrMinInput.value = data.ovr?.min ?? ovrMinInput.value;
+        ovrMaxInput.value = data.ovr?.max ?? ovrMaxInput.value;
+        ovrPresetSelect.value = data.ovr?.preset ?? ovrPresetSelect.value;
+
+        formationSelect.value = data.formation || formationSelect.value;
+        squadSizeSelect.value = data.squadSize || squadSizeSelect.value;
+
+        buildTableHeader();
+        players = data.players || [];
+        renderSquadTable();
+
+        if (data.story?.currentStory) {
+          currentStory = data.story.currentStory;
+          if (enableStoryPanel.checked) {
+            storyBodyEl.textContent = currentStory;
+          } else {
+            storyBodyEl.textContent = "Story panel disabled. Enable it in Club card to generate narrative flavour.";
+          }
+        } else if (enableStoryPanel.checked) {
+          generateStory({ tier: challengeTierSelect.value, objective: challengeSummaryEl.textContent || "" });
+        }
+
+        updateExportText();
+      }
+
+      function deletePreset(name) {
+        const map = getPresetsMap();
+        if (!map[name]) return;
+        delete map[name];
+        setPresetsMap(map);
+        refreshPresetSelect();
+      }
+
+      savePresetBtn.addEventListener("click", () => {
+        savePreset();
+      });
+
+      loadPresetBtn.addEventListener("click", () => {
+        if (!presetSelect.value) return;
+        applyPreset(presetSelect.value);
+      });
+
+      deletePresetBtn.addEventListener("click", () => {
+        if (!presetSelect.value) return;
+        deletePreset(presetSelect.value);
+      });
+
+      // =========================
+      // INIT
+      // =========================
+
+      (function init() {
+        populateFormationSelect();
+        applyOvrPreset("balanced");
+        buildTableHeader();
+        refreshPresetSelect();
+        storyBodyEl.textContent = "No story generated yet. Generate a club to create narrative context for your save.";
+      })();
+    })();
+  </script>
+</body>
+</html>
